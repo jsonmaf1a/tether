@@ -1,0 +1,25 @@
+Language: Cpp
+BasedOnStyle: Microsoft
+ColumnLimit: 100
+IndentWidth: 4
+AllowShortFunctionsOnASingleLine: All
+SpaceBeforeParens: Never
+BreakAfterReturnType: None
+IndentCaseBlocks: false
+IndentCaseLabels: true
+# IndentExportBlock: true
+BreakConstructorInitializers: BeforeComma
+IndentExternBlock: AfterExternBlock
+NamespaceIndentation: All
+UseTab: Never
+SortIncludes: CaseSensitive
+IncludeBlocks: Merge
+BraceWrapping:
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+  IndentBraces: false
+PackConstructorInitializers: NextLine
+AlignAfterOpenBracket: Align
+AllowShortLambdasOnASingleLine: All
+QualifierAlignment: Left

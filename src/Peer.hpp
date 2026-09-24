@@ -6,4 +6,3 @@ struct Peer
 {
     std::uint32_t id;
 };
-

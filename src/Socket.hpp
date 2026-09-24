@@ -1,15 +1,11 @@
 #pragma once
 
 #include <arpa/inet.h>
-#include <array>
-#include <cstddef>
 #include <cstdio>
 #include <cstdlib>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-
-constexpr std::size_t BUFFER_SIZE = 8;
 
 enum SocketType
 {
@@ -20,11 +16,7 @@ enum SocketType
 class Socket
 {
     public:
-        ~Socket() {
-            close();
-        }
-
-        std::array<std::byte, BUFFER_SIZE> buffer;
+        ~Socket() { close(); }
 
         void close()
         {
@@ -42,7 +34,8 @@ class Socket
         {
             if(socketFd == -1)
             {
-                socketFd = socket(AF_INET, type, 0); if(socketFd == -1)
+                socketFd = socket(AF_INET, type, 0);
+                if(socketFd == -1)
                 {
                     perror("Error creating socket");
                     exit(EXIT_FAILURE);

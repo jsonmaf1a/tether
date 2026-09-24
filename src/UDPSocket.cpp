@@ -1,22 +1,10 @@
 #include "UDPSocket.hpp"
+#include <cstdint>
 #include <netinet/in.h>
 #include <sys/socket.h>
 
-void UDPSocket::send(std::span<const std::byte> payload, const sockaddr_in &dest) {
-    int enable = 1;
-
-    if (::setsockopt(
-            this->fd,
-            SOL_SOCKET,
-            SO_BROADCAST,
-            &enable,
-            sizeof(enable)
-        ) == -1)
-    {
-        perror("Error enabling UDP broadcast");
-        exit(EXIT_FAILURE);
-    }
-
+void UDPSocket::send(std::span<const std::byte> payload, const sockaddr_in &dest)
+{
     auto sent = ::sendto(
         this->fd,
         payload.data(),
@@ -32,7 +20,8 @@ void UDPSocket::send(std::span<const std::byte> payload, const sockaddr_in &dest
     }
 };
 
-ssize_t UDPSocket::receive(std::span<std::byte> payload, sockaddr_in &src) {
+ssize_t UDPSocket::receive(std::span<std::byte> payload, sockaddr_in &src)
+{
     socklen_t srcLen = sizeof(src);
     auto received = ::recvfrom(
         this->fd,
@@ -49,4 +38,35 @@ ssize_t UDPSocket::receive(std::span<std::byte> payload, sockaddr_in &src) {
     }
 
     return received;
+};
+
+void UDPSocket::bind(uint16_t port)
+{
+    sockaddr_in address{};
+
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = INADDR_ANY;
+    address.sin_port = htons(port);
+
+    if(::bind(this->fd, reinterpret_cast<sockaddr*>(&address), sizeof(address)) == -1)
+    {
+        perror("Socket bind failed");
+        exit(EXIT_FAILURE);
+    }
+};
+
+void UDPSocket::enableBroadcast()
+{
+    int enable = 1;
+    if (::setsockopt(
+            this->fd,
+            SOL_SOCKET,
+            SO_BROADCAST,
+            &enable,
+            sizeof(enable)
+        ) == -1)
+    {
+        perror("Error enabling UDP broadcast");
+        exit(EXIT_FAILURE);
+    }
 };

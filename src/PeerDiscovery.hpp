@@ -7,8 +7,7 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <vector>
-
-constexpr int DISCOVERY_TIMEOUT = 500;
+#include <chrono>
 
 class PeerDiscovery
 {
@@ -18,16 +17,19 @@ class PeerDiscovery
             broadcast.sin_family = AF_INET;
             broadcast.sin_port = htons(port);
             broadcast.sin_addr.s_addr = htonl(INADDR_BROADCAST);
+
+            ownPeerId = generatePeerId();
         };
 
-        std::vector<Peer> discover();
-        void read();
-        void write();
+        void discover(std::chrono::milliseconds timeout);
+        void announceSelf();
 
     private:
         UDPSocket socket;
         uint16_t port;
         sockaddr_in broadcast;
+        std::vector<Peer> peers;
+        uint32_t ownPeerId;
 
         uint32_t generatePeerId();
 };

@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <netinet/in.h>
 #include <sys/socket.h>
+#include <poll.h>
 
 void UDPSocket::send(std::span<const std::byte> payload, const sockaddr_in &dest)
 {
@@ -33,12 +34,22 @@ ssize_t UDPSocket::receive(std::span<std::byte> payload, sockaddr_in &src)
     );
 
     if(received == -1) {
-        perror("Error sending data over UDP socket");
+        perror("Error receiving data over UDP socket");
         exit(EXIT_FAILURE);
     }
 
     return received;
 };
+
+bool UDPSocket::waitUntilReadable(std::chrono::milliseconds timeout)
+{
+    pollfd pfd{};
+    pfd.fd = fd;
+    pfd.events = POLLIN;
+
+    int timeoutMs = timeout.count();
+    return poll(&pfd, 1, timeoutMs) > 0;
+}
 
 void UDPSocket::bind(uint16_t port)
 {
@@ -70,3 +81,20 @@ void UDPSocket::enableBroadcast()
         exit(EXIT_FAILURE);
     }
 };
+
+void UDPSocket::enableReuse()
+{
+    int enable = 1;
+
+    if (setsockopt(
+        fd,
+        SOL_SOCKET,
+        SO_REUSEADDR,
+        &enable,
+        sizeof(enable)
+    ) == -1)
+    {
+        perror("Error enabling port reuse");
+        exit(EXIT_FAILURE);
+    }
+}

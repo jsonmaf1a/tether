@@ -1,10 +1,13 @@
 #include "UDPSocket.hpp"
 #include <cstdint>
+#include <expected>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <poll.h>
+#include <sys/types.h>
+#include <system_error>
 
-void UDPSocket::send(std::span<const std::byte> payload, const sockaddr_in &dest)
+std::expected<ssize_t, std::error_code> UDPSocket::send(std::span<const std::byte> payload, const sockaddr_in &dest)
 {
     auto sent = ::sendto(
         this->fd,
@@ -15,13 +18,13 @@ void UDPSocket::send(std::span<const std::byte> payload, const sockaddr_in &dest
         sizeof(dest)
     );
 
-    if(sent == -1) {
-        perror("Error sending data over UDP socket");
-        exit(EXIT_FAILURE);
-    }
+    if(sent == -1)
+        return std::unexpected(std::error_code(errno, std::generic_category()));
+
+    return sent;
 };
 
-ssize_t UDPSocket::receive(std::span<std::byte> payload, sockaddr_in &src)
+std::expected<ssize_t, std::error_code> UDPSocket::receive(std::span<std::byte> payload, sockaddr_in &src)
 {
     socklen_t srcLen = sizeof(src);
     auto received = ::recvfrom(
@@ -33,10 +36,8 @@ ssize_t UDPSocket::receive(std::span<std::byte> payload, sockaddr_in &src)
         &srcLen
     );
 
-    if(received == -1) {
-        perror("Error receiving data over UDP socket");
-        exit(EXIT_FAILURE);
-    }
+    if(received == -1)
+        return std::unexpected(std::error_code(errno, std::generic_category()));
 
     return received;
 };
@@ -51,7 +52,7 @@ bool UDPSocket::waitUntilReadable(std::chrono::milliseconds timeout)
     return poll(&pfd, 1, timeoutMs) > 0;
 }
 
-void UDPSocket::bind(uint16_t port)
+std::expected<void, std::error_code> UDPSocket::bind(uint16_t port)
 {
     sockaddr_in address{};
 
@@ -60,54 +61,29 @@ void UDPSocket::bind(uint16_t port)
     address.sin_port = htons(port);
 
     if(::bind(this->fd, reinterpret_cast<sockaddr*>(&address), sizeof(address)) == -1)
-    {
-        perror("Socket bind failed");
-        exit(EXIT_FAILURE);
-    }
+        return std::unexpected(std::error_code(errno, std::generic_category()));
+
+    return {};
 };
 
-void UDPSocket::enableBroadcast()
+std::expected<void, std::error_code> UDPSocket::enableBroadcast()
 {
-    int enable = 1;
-    if (::setsockopt(
-            this->fd,
-            SOL_SOCKET,
-            SO_BROADCAST,
-            &enable,
-            sizeof(enable)
-        ) == -1)
-    {
-        perror("Error enabling UDP broadcast");
-        exit(EXIT_FAILURE);
-    }
+    return setOption(SOL_SOCKET, SO_BROADCAST, 1);
 };
 
-void UDPSocket::enableReuse()
+std::expected<void, std::error_code> UDPSocket::enableReuse()
 {
-    int rAddr = 1;
-    int rPort = 1;
+    return setOption(SOL_SOCKET, SO_REUSEADDR, 1)
+        .and_then([this] {
+            return setOption(SOL_SOCKET, SO_REUSEPORT, 1);
+        });
+}
 
-    if (setsockopt(
-        fd,
-        SOL_SOCKET,
-        SO_REUSEADDR,
-        &rAddr,
-        sizeof(rAddr)
-    ) == -1)
-    {
-        perror("Error enabling addr reuse");
-        exit(EXIT_FAILURE);
-    }
+template<typename T>
+std::expected<void, std::error_code> UDPSocket::setOption(int level, int option, const T& value)
+{
+    if (::setsockopt(fd, level, option, &value, sizeof(value)) == -1)
+        return std::unexpected(std::error_code(errno, std::generic_category()));
 
-    if (setsockopt(
-        fd,
-        SOL_SOCKET,
-        SO_REUSEPORT,
-        &rPort,
-        sizeof(rPort)
-    ) == -1)
-    {
-        perror("Error enabling port reuse");
-        exit(EXIT_FAILURE);
-    }
+    return {};
 }

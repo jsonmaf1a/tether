@@ -1,8 +1,7 @@
 #pragma once
 
 #include <arpa/inet.h>
-#include <cstdio>
-#include <cstdlib>
+#include <expected>
 #include <print>
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -22,9 +21,7 @@ class Socket
         Socket& operator=(const Socket&) = delete;
 
         Socket(Socket&& other) noexcept
-            : fd(std::exchange(other.fd, -1))
-        {
-        }
+            : fd(std::exchange(other.fd, -1)) {}
 
         Socket& operator=(Socket&& other) noexcept
         {
@@ -34,6 +31,26 @@ class Socket
             }
 
             return *this;
+        }
+        virtual ~Socket() { close(); }
+
+        static std::expected<Socket, std::error_code> create(SocketType type)
+        {
+            const int fd = socket(AF_INET, type, 0);
+
+            if(fd == -1)
+            {
+                return std::unexpected(
+                    std::error_code(errno, std::generic_category())
+                );
+            }
+
+            return Socket(fd);
+        }
+
+        static Socket fromFd(int fd)
+        {
+            return Socket(fd);
         }
 
         void close()
@@ -46,24 +63,10 @@ class Socket
         };
 
     protected:
-        int fd = -1;
-
-        Socket(SocketType type, int socketFd = -1)
+        explicit Socket(int socketFd) : fd(socketFd)
         {
-            if(socketFd == -1)
-            {
-                std::println("Initializing socket");
-
-                socketFd = socket(AF_INET, type, 0);
-                if(socketFd == -1)
-                {
-                    perror("Error creating socket");
-                    exit(EXIT_FAILURE);
-                }
-            }
-
-
-            this->fd = socketFd;
             std::println("Socket {} initialized successfully", fd);
-        };
+        }
+
+        int fd = -1;
 };

@@ -1,17 +1,14 @@
 #include "Message.hpp"
 #include <cstring>
+#include <expected>
 #include <netinet/in.h>
-#include <print>
 
-Message Message::fromBytes(std::span<std::byte> bytes)
+std::expected<Message, std::error_code> Message::fromBytes(std::span<std::byte> bytes)
 {
     std::size_t offset = 0;
 
-    if(bytes.size_bytes() < MESSAGE_SIZE)
-    {
-        // TODO: handle error
-        std::println("Invalid message");
-    }
+    if (bytes.size_bytes() < MESSAGE_SIZE)
+        return std::unexpected(std::make_error_code(std::errc::bad_message));
 
     uint8_t version;
     std::memcpy(&version, bytes.data() + offset, sizeof(version));
@@ -30,7 +27,7 @@ Message Message::fromBytes(std::span<std::byte> bytes)
     std::memcpy(&peerId, bytes.data() + offset, sizeof(peerId));
     peerId = ntohl(peerId);
 
-    return {version, type, port, peerId};
+    return Message{version, type, port, peerId};
 };
 
 std::array<std::byte, MESSAGE_SIZE> Message::toBytes(const Message &msg)

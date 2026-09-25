@@ -8,7 +8,6 @@
 #include <sys/socket.h>
 
 //TODO:
-// - deduplicate peers
 // - lastSeen
 // - remove expired peers
 
@@ -44,7 +43,7 @@ void PeerDiscovery::discover(std::chrono::milliseconds timeout)
 
         std::println("Discovered peer {} at {}:{}", peer.id, ip, peer.tcpPort);
 
-        peers.push_back(peer);
+        peers[peer.id] = peer;
     }
 };
 

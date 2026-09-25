@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include <vector>
+#include <unordered_map>
 #include <chrono>
 
 class PeerDiscovery
@@ -32,7 +32,7 @@ class PeerDiscovery
         UDPSocket socket;
         uint16_t port;
         sockaddr_in broadcast;
-        std::vector<Peer> peers;
+        std::unordered_map<std::uint32_t, Peer> peers;
         uint32_t ownPeerId;
 
         uint32_t generatePeerId();

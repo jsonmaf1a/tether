@@ -7,6 +7,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <utility>
 
 enum SocketType
 {
@@ -17,7 +18,23 @@ enum SocketType
 class Socket
 {
     public:
-        ~Socket() { close(); }
+        Socket(const Socket&) = delete;
+        Socket& operator=(const Socket&) = delete;
+
+        Socket(Socket&& other) noexcept
+            : fd(std::exchange(other.fd, -1))
+        {
+        }
+
+        Socket& operator=(Socket&& other) noexcept
+        {
+            if (this != &other) {
+                close();
+                fd = std::exchange(other.fd, -1);
+            }
+
+            return *this;
+        }
 
         void close()
         {

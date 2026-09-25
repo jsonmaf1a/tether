@@ -84,14 +84,27 @@ void UDPSocket::enableBroadcast()
 
 void UDPSocket::enableReuse()
 {
-    int enable = 1;
+    int rAddr = 1;
+    int rPort = 1;
 
     if (setsockopt(
         fd,
         SOL_SOCKET,
         SO_REUSEADDR,
-        &enable,
-        sizeof(enable)
+        &rAddr,
+        sizeof(rAddr)
+    ) == -1)
+    {
+        perror("Error enabling addr reuse");
+        exit(EXIT_FAILURE);
+    }
+
+    if (setsockopt(
+        fd,
+        SOL_SOCKET,
+        SO_REUSEPORT,
+        &rPort,
+        sizeof(rPort)
     ) == -1)
     {
         perror("Error enabling port reuse");

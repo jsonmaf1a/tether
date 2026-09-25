@@ -3,6 +3,7 @@
 #include <arpa/inet.h>
 #include <cstdio>
 #include <cstdlib>
+#include <print>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -34,6 +35,8 @@ class Socket
         {
             if(socketFd == -1)
             {
+                std::println("Initializing socket");
+
                 socketFd = socket(AF_INET, type, 0);
                 if(socketFd == -1)
                 {
@@ -42,6 +45,8 @@ class Socket
                 }
             }
 
+
             this->fd = socketFd;
+            std::println("Socket {} initialized successfully", fd);
         };
 };

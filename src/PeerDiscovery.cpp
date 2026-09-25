@@ -37,22 +37,23 @@ void PeerDiscovery::discover(std::chrono::milliseconds timeout)
         auto msg = Message::fromBytes(payload);
         if (msg.peerId == ownPeerId) continue;
 
-        Peer peer {.id = msg.peerId, .address = src};
+        Peer peer {.id = msg.peerId, .address = src, .tcpPort = msg.port};
 
         char ip[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &peer.address.sin_addr, ip, INET_ADDRSTRLEN);
-        std::println("Discovered peer {} at {}", peer.id, ip);
+
+        std::println("Discovered peer {} at {}:{}", peer.id, ip, peer.tcpPort);
 
         peers.push_back(peer);
     }
 };
 
-void PeerDiscovery::announceSelf()
+void PeerDiscovery::announceSelf(uint16_t tcpPort)
 {
     Message msg = {
         .version = 1, // TODO: add versioning
         .type = MessageType::Announcement,
-        .port = port,
+        .port = tcpPort,
         .peerId = ownPeerId,
     };
 

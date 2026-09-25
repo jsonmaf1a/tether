@@ -12,8 +12,12 @@
 class PeerDiscovery
 {
     public:
-        PeerDiscovery(uint16_t port) : socket(port), port(port)
+        PeerDiscovery(uint16_t port) : port(port)
         {
+            socket.enableReuse();
+            socket.enableBroadcast();
+            socket.bind(port);
+
             broadcast.sin_family = AF_INET;
             broadcast.sin_port = htons(port);
             broadcast.sin_addr.s_addr = htonl(INADDR_BROADCAST);
@@ -22,7 +26,7 @@ class PeerDiscovery
         };
 
         void discover(std::chrono::milliseconds timeout);
-        void announceSelf();
+        void announceSelf(uint16_t tcpPort);
 
     private:
         UDPSocket socket;

@@ -7,10 +7,6 @@
 #include <random>
 #include <sys/socket.h>
 
-//TODO:
-// - lastSeen
-// - remove expired peers
-
 void PeerDiscovery::discover(std::chrono::milliseconds timeout)
 {
     auto start = std::chrono::steady_clock::now();
@@ -44,6 +40,7 @@ void PeerDiscovery::discover(std::chrono::milliseconds timeout)
         std::println("Discovered peer {} at {}:{}", peer.id, ip, peer.tcpPort);
 
         peers[peer.id] = peer;
+        removeExpiredPeers();
     }
 };
 
@@ -69,3 +66,14 @@ uint32_t PeerDiscovery::generatePeerId()
     std::mt19937 gen(rd());
     return gen();
 };
+
+void PeerDiscovery::removeExpiredPeers() {
+    auto now = std::chrono::steady_clock::now();
+
+    for (auto it = peers.begin(); it != peers.end(); ) {
+        if (now - it->second.lastSeen > PEER_TIMEOUT)
+            it = peers.erase(it);
+        else
+            ++it;
+    }
+}

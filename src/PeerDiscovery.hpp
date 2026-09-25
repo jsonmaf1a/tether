@@ -9,6 +9,10 @@
 #include <unordered_map>
 #include <chrono>
 
+using namespace std::chrono_literals;
+
+constexpr auto PEER_TIMEOUT = 10s;
+
 class PeerDiscovery
 {
     public:
@@ -36,4 +40,5 @@ class PeerDiscovery
         uint32_t ownPeerId;
 
         uint32_t generatePeerId();
+        void removeExpiredPeers();
 };

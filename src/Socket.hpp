@@ -53,14 +53,8 @@ class Socket
             return Socket(fd);
         }
 
-        void close()
-        {
-            if(fd != -1)
-            {
-                ::close(fd);
-                fd = -1;
-            }
-        };
+        std::expected<void, std::error_code> bind(uint16_t port);
+        void close();
 
     protected:
         explicit Socket(int socketFd) : fd(socketFd)

@@ -10,7 +10,7 @@ class UDPSocket : public Socket
     public:
         static std::expected<UDPSocket, std::error_code> create()
         {
-            const int fd = socket(AF_INET, SOCK_DGRAM, 0);
+            const int fd = socket(AF_INET, SocketType::UDP, 0);
 
             if (fd == -1)
             {
@@ -22,7 +22,6 @@ class UDPSocket : public Socket
             return UDPSocket(fd);
         }
 
-        std::expected<void, std::error_code> bind(uint16_t port);
         std::expected<void, std::error_code> enableBroadcast();
         std::expected<void, std::error_code> enableReuse();
 

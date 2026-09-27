@@ -11,7 +11,6 @@ using namespace std::chrono_literals;
 // - cli
 
 constexpr uint16_t BROADCAST_PORT = 6767;
-constexpr auto DISCOVERY_TIMEOUT = 2500ms;
 
 int main(int argc, char *argv[])
 {
@@ -46,7 +45,7 @@ int main(int argc, char *argv[])
             return 1;
         }
 
-        if(auto res = discovery->discover(DISCOVERY_TIMEOUT); !res)
+        if(auto res = discovery->discover(); !res)
         {
             std::println("Error while discovering: {}", res.error().message());
             return 1;

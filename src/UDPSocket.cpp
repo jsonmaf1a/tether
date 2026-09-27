@@ -1,11 +1,5 @@
 #include "UDPSocket.hpp"
-#include <cstdint>
-#include <expected>
-#include <netinet/in.h>
-#include <sys/socket.h>
 #include <poll.h>
-#include <sys/types.h>
-#include <system_error>
 
 std::expected<ssize_t, std::error_code> UDPSocket::send(std::span<const std::byte> payload, const sockaddr_in &dest)
 {
@@ -51,20 +45,6 @@ bool UDPSocket::waitUntilReadable(std::chrono::milliseconds timeout)
     int timeoutMs = timeout.count();
     return poll(&pfd, 1, timeoutMs) > 0;
 }
-
-std::expected<void, std::error_code> UDPSocket::bind(uint16_t port)
-{
-    sockaddr_in address{};
-
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = INADDR_ANY;
-    address.sin_port = htons(port);
-
-    if(::bind(this->fd, reinterpret_cast<sockaddr*>(&address), sizeof(address)) == -1)
-        return std::unexpected(std::error_code(errno, std::generic_category()));
-
-    return {};
-};
 
 std::expected<void, std::error_code> UDPSocket::enableBroadcast()
 {

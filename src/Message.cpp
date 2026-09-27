@@ -1,6 +1,5 @@
 #include "Message.hpp"
 #include <cstring>
-#include <expected>
 #include <netinet/in.h>
 
 std::expected<Message, std::error_code> Message::fromBytes(std::span<std::byte> bytes)

@@ -9,10 +9,10 @@
 #include <sys/socket.h>
 #include <system_error>
 #include <unordered_map>
-#include <chrono>
 
 using namespace std::chrono_literals;
 
+constexpr auto DISCOVERY_TIMEOUT = 2500ms;
 constexpr auto PEER_TIMEOUT = 10s;
 
 class PeerDiscovery
@@ -41,7 +41,7 @@ class PeerDiscovery
 
         }
 
-        std::expected<void, std::error_code> discover(std::chrono::milliseconds timeout);
+        std::expected<void, std::error_code> discover();
         std::expected<void, std::error_code> announceSelf(uint16_t tcpPort);
 
     private:

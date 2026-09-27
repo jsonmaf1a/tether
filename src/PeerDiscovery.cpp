@@ -1,14 +1,8 @@
 #include "PeerDiscovery.hpp"
 #include "Message.hpp"
-#include <arpa/inet.h>
-#include <expected>
-#include <netinet/in.h>
-#include <print>
 #include <random>
-#include <sys/socket.h>
-#include <system_error>
 
-std::expected<void, std::error_code> PeerDiscovery::discover(std::chrono::milliseconds timeout)
+std::expected<void, std::error_code> PeerDiscovery::discover()
 {
     auto start = std::chrono::steady_clock::now();
 
@@ -17,7 +11,7 @@ std::expected<void, std::error_code> PeerDiscovery::discover(std::chrono::millis
             std::chrono::steady_clock::now() - start
         );
 
-        auto remaining = timeout - elapsed;
+        auto remaining = DISCOVERY_TIMEOUT - elapsed;
 
         if (remaining <= std::chrono::milliseconds::zero())
             break;

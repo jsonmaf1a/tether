@@ -10,11 +10,9 @@ class TCPSocket : public Socket
         {
             const int fd = socket(AF_INET, SocketType::TCP, 0);
 
-            if (fd == -1)
+            if(fd == -1)
             {
-                return std::unexpected(
-                    std::error_code(errno, std::generic_category())
-                );
+                return std::unexpected(std::error_code(errno, std::generic_category()));
             }
 
             return TCPSocket(fd);

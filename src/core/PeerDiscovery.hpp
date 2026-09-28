@@ -18,16 +18,20 @@ constexpr auto PEER_TIMEOUT = 10s;
 class PeerDiscovery
 {
     public:
-        static std::expected<PeerDiscovery, std::error_code> create(uint16_t port) {
-            return UDPSocket::create()
-                .and_then([port](UDPSocket socket) -> std::expected<PeerDiscovery, std::error_code> {
-                    if (auto r = socket.enableReuse(); !r) {
+        static std::expected<PeerDiscovery, std::error_code> create(uint16_t port)
+        {
+            return UDPSocket::create().and_then(
+                [port](UDPSocket socket) -> std::expected<PeerDiscovery, std::error_code> {
+                    if(auto r = socket.enableReuse(); !r)
+                    {
                         return std::unexpected(r.error());
                     }
-                    if (auto r = socket.enableBroadcast(); !r) {
+                    if(auto r = socket.enableBroadcast(); !r)
+                    {
                         return std::unexpected(r.error());
                     }
-                    if (auto r = socket.bind(port); !r) {
+                    if(auto r = socket.bind(port); !r)
+                    {
                         return std::unexpected(r.error());
                     }
 
@@ -38,14 +42,15 @@ class PeerDiscovery
 
                     return PeerDiscovery(std::move(socket), broadcast);
                 });
-
         }
 
         std::expected<void, std::error_code> discover();
         std::expected<void, std::error_code> announceSelf(uint16_t tcpPort);
 
     private:
-        explicit PeerDiscovery(UDPSocket socket, sockaddr_in broadcast) : socket(std::move(socket)), broadcast(broadcast) {}
+        explicit PeerDiscovery(UDPSocket socket, sockaddr_in broadcast)
+            : socket(std::move(socket)), broadcast(broadcast)
+        {}
 
         UDPSocket socket;
         sockaddr_in broadcast{};

@@ -1,4 +1,4 @@
-#include "PeerDiscovery.hpp"
+#include "core/PeerDiscovery.hpp"
 #include <cstdint>
 #include <print>
 #include <system_error>
@@ -16,13 +16,16 @@ int main(int argc, char *argv[])
 {
     // temporary
     std::string tcpPortValue;
-    if (argc > 1)
+    if(argc > 1)
     {
         std::string_view tcpPortArg = argv[1];
 
-        if(tcpPortArg == "--port" && argv[2]) {
+        if(tcpPortArg == "--port" && argv[2])
+        {
             tcpPortValue = argv[2];
-        } else return 1;
+        }
+        else
+            return 1;
     }
 
     uint16_t tcpPort = static_cast<uint16_t>(std::stoi(tcpPortValue));
@@ -37,7 +40,8 @@ int main(int argc, char *argv[])
     bool isRunning = true;
     while(isRunning)
     {
-        // TODO: handle transient network errors (e.g. interface reconnect) with retry instead of terminating
+        // TODO: handle transient network errors (e.g. interface reconnect) with retry instead of
+        // terminating
 
         if(auto res = discovery->announceSelf(tcpPort); !res)
         {

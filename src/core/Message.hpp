@@ -1,8 +1,8 @@
 #pragma once
 
 #include <cstdint>
-#include <span>
 #include <expected>
+#include <span>
 #include <system_error>
 
 constexpr int MESSAGE_SIZE = 8;

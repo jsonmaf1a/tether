@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Socket.hpp"
-#include <span>
 #include <chrono>
+#include <span>
 #include <system_error>
 
 class UDPSocket : public Socket
@@ -12,11 +12,9 @@ class UDPSocket : public Socket
         {
             const int fd = socket(AF_INET, SocketType::UDP, 0);
 
-            if (fd == -1)
+            if(fd == -1)
             {
-                return std::unexpected(
-                    std::error_code(errno, std::generic_category())
-                );
+                return std::unexpected(std::error_code(errno, std::generic_category()));
             }
 
             return UDPSocket(fd);
@@ -25,14 +23,16 @@ class UDPSocket : public Socket
         std::expected<void, std::error_code> enableBroadcast();
         std::expected<void, std::error_code> enableReuse();
 
-        std::expected<ssize_t, std::error_code> send(std::span<const std::byte> payload, const sockaddr_in& dest);
-        std::expected<ssize_t, std::error_code> receive(std::span<std::byte> payload, sockaddr_in& src);
+        std::expected<ssize_t, std::error_code> send(std::span<const std::byte> payload,
+                                                     const sockaddr_in &dest);
+        std::expected<ssize_t, std::error_code> receive(std::span<std::byte> payload,
+                                                        sockaddr_in &src);
 
         bool waitUntilReadable(std::chrono::milliseconds timeout);
 
     private:
         explicit UDPSocket(int fd) : Socket(fd) {}
 
-        template<typename T>
-        std::expected<void, std::error_code> setOption(int level, int option, const T& value);
+        template <typename T>
+        std::expected<void, std::error_code> setOption(int level, int option, const T &value);
 };

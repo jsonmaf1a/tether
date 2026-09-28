@@ -6,17 +6,17 @@ std::expected<void, std::error_code> PeerDiscovery::discover()
 {
     auto start = std::chrono::steady_clock::now();
 
-    while (true) {
+    while(true)
+    {
         auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now() - start
-        );
+            std::chrono::steady_clock::now() - start);
 
         auto remaining = DISCOVERY_TIMEOUT - elapsed;
 
-        if (remaining <= std::chrono::milliseconds::zero())
+        if(remaining <= std::chrono::milliseconds::zero())
             break;
 
-        if (!socket.waitUntilReadable(remaining))
+        if(!socket.waitUntilReadable(remaining))
             break;
 
         std::array<std::byte, MESSAGE_SIZE> payload{};
@@ -27,14 +27,17 @@ std::expected<void, std::error_code> PeerDiscovery::discover()
         if(!res)
             return std::unexpected(res.error());
 
-        if (*res != MESSAGE_SIZE) continue;
+        if(*res != MESSAGE_SIZE)
+            continue;
 
         auto msg = Message::fromBytes(payload);
-        if(!msg) continue;
+        if(!msg)
+            continue;
 
-        if (msg->peerId == ownPeerId) continue;
+        if(msg->peerId == ownPeerId)
+            continue;
 
-        Peer peer {.id = msg->peerId, .address = src, .tcpPort = msg->port};
+        Peer peer{.id = msg->peerId, .address = src, .tcpPort = msg->port};
 
         char ip[INET_ADDRSTRLEN];
         inet_ntop(AF_INET, &peer.address.sin_addr, ip, INET_ADDRSTRLEN);
@@ -70,9 +73,9 @@ void PeerDiscovery::removeExpiredPeers()
 {
     auto now = std::chrono::steady_clock::now();
 
-    for (auto it = peers.begin(); it != peers.end(); )
+    for(auto it = peers.begin(); it != peers.end();)
     {
-        if (now - it->second.lastSeen > PEER_TIMEOUT)
+        if(now - it->second.lastSeen > PEER_TIMEOUT)
             it = peers.erase(it);
         else
             ++it;

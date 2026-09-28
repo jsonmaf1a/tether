@@ -2,6 +2,8 @@ Language: Cpp
 BasedOnStyle: Microsoft
 ColumnLimit: 100
 IndentWidth: 4
+AccessModifierOffset: 0
+IndentAccessModifiers: true
 AllowShortFunctionsOnASingleLine: All
 SpaceBeforeParens: Never
 BreakAfterReturnType: None

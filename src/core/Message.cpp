@@ -2,11 +2,14 @@
 #include <cstring>
 #include <netinet/in.h>
 
+// TODO:
+// - add helper function to simplify serialization/deserialization
+
 std::expected<Message, std::error_code> Message::fromBytes(std::span<std::byte> bytes)
 {
     std::size_t offset = 0;
 
-    if (bytes.size_bytes() < MESSAGE_SIZE)
+    if(bytes.size_bytes() < MESSAGE_SIZE)
         return std::unexpected(std::make_error_code(std::errc::bad_message));
 
     uint8_t version;

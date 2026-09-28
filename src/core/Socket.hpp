@@ -17,15 +17,15 @@ enum SocketType
 class Socket
 {
     public:
-        Socket(const Socket&) = delete;
-        Socket& operator=(const Socket&) = delete;
+        Socket(const Socket &) = delete;
+        Socket &operator=(const Socket &) = delete;
 
-        Socket(Socket&& other) noexcept
-            : fd(std::exchange(other.fd, -1)) {}
+        Socket(Socket &&other) noexcept : fd(std::exchange(other.fd, -1)) {}
 
-        Socket& operator=(Socket&& other) noexcept
+        Socket &operator=(Socket &&other) noexcept
         {
-            if (this != &other) {
+            if(this != &other)
+            {
                 close();
                 fd = std::exchange(other.fd, -1);
             }
@@ -40,18 +40,13 @@ class Socket
 
             if(fd == -1)
             {
-                return std::unexpected(
-                    std::error_code(errno, std::generic_category())
-                );
+                return std::unexpected(std::error_code(errno, std::generic_category()));
             }
 
             return Socket(fd);
         }
 
-        static Socket fromFd(int fd)
-        {
-            return Socket(fd);
-        }
+        static Socket fromFd(int fd) { return Socket(fd); }
 
         std::expected<void, std::error_code> bind(uint16_t port);
         void close();

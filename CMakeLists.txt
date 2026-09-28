@@ -13,4 +13,8 @@ execute_process(
 file(GLOB_RECURSE TETHER_SOURCES src/*.cpp)
 add_executable(tether ${TETHER_SOURCES})
 
+target_include_directories(tether PRIVATE
+    ${CMAKE_SOURCE_DIR}/src
+)
+
 target_compile_features(tether PRIVATE cxx_std_23)

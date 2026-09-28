@@ -17,7 +17,7 @@ std::expected<void, std::error_code> Socket::bind(uint16_t port)
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
 
-    if(::bind(this->fd, reinterpret_cast<sockaddr*>(&address), sizeof(address)) == -1)
+    if(::bind(this->fd, reinterpret_cast<sockaddr *>(&address), sizeof(address)) == -1)
         return std::unexpected(std::error_code(errno, std::generic_category()));
 
     return {};

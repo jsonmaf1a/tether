@@ -49,7 +49,7 @@ class PeerDiscovery
 
     private:
         explicit PeerDiscovery(UDPSocket socket, sockaddr_in broadcast)
-            : socket(std::move(socket)), broadcast(broadcast)
+            : socket(std::move(socket)), broadcast(broadcast), ownPeerId(generatePeerId())
         {}
 
         UDPSocket socket;

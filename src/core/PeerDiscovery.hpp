@@ -1,14 +1,17 @@
 #pragma once
 
 #include "Peer.hpp"
+#include "PeerID.hpp"
 #include "UDPSocket.hpp"
 #include <arpa/inet.h>
 #include <cstdint>
 #include <expected>
 #include <netinet/in.h>
+#include <ranges>
 #include <sys/socket.h>
 #include <system_error>
 #include <unordered_map>
+#include <vector>
 
 using namespace std::chrono_literals;
 
@@ -47,6 +50,11 @@ class PeerDiscovery
         std::expected<void, std::error_code> discover();
         std::expected<void, std::error_code> announceSelf(uint16_t tcpPort);
 
+        const std::vector<Peer> getPeers()
+        {
+            return peers | std::ranges::views::values | std::ranges::to<std::vector>();
+        };
+
     private:
         explicit PeerDiscovery(UDPSocket socket, sockaddr_in broadcast)
             : socket(std::move(socket)), broadcast(broadcast), ownPeerId(generatePeerId())
@@ -55,7 +63,7 @@ class PeerDiscovery
         UDPSocket socket;
         sockaddr_in broadcast{};
         std::unordered_map<std::uint32_t, Peer> peers;
-        uint32_t ownPeerId;
+        PeerID ownPeerId;
 
         uint32_t generatePeerId();
         void removeExpiredPeers();

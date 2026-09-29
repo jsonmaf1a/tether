@@ -1,5 +1,8 @@
 #include "PeerDiscovery.hpp"
 #include "Message.hpp"
+#include "core/Endpoint.hpp"
+#include <netinet/in.h>
+#include <print>
 #include <random>
 
 std::expected<void, std::error_code> PeerDiscovery::discover()
@@ -20,8 +23,8 @@ std::expected<void, std::error_code> PeerDiscovery::discover()
             break;
 
         std::array<std::byte, MESSAGE_SIZE> payload{};
-        sockaddr_in src{};
 
+        sockaddr_in src{};
         auto res = socket.receive(payload, src);
 
         if(!res)
@@ -37,14 +40,13 @@ std::expected<void, std::error_code> PeerDiscovery::discover()
         if(msg->peerId == ownPeerId)
             continue;
 
-        Peer peer{.id = msg->peerId, .address = src, .tcpPort = msg->port};
+        Endpoint peerAddress(src);
+        Peer peer{.id = msg->peerId, .address = peerAddress, .tcpPort = msg->port};
 
-        char ip[INET_ADDRSTRLEN];
-        inet_ntop(AF_INET, &peer.address.sin_addr, ip, INET_ADDRSTRLEN);
+        std::println("Discovered peer {} at {}:{}", peer.id.value, peerAddress.getIPString(),
+                     peer.tcpPort);
 
-        std::println("Discovered peer {} at {}:{}", peer.id, ip, peer.tcpPort);
-
-        peers[peer.id] = peer;
+        peers.insert_or_assign(peer.id.value, peer);
         removeExpiredPeers();
     }
 
@@ -64,7 +66,7 @@ std::expected<void, std::error_code> PeerDiscovery::announceSelf(uint16_t tcpPor
     if(!res)
         return std::unexpected(res.error());
 
-    std::println("Peer {} available to discovery", msg.peerId);
+    std::println("Peer {} available to discovery", msg.peerId.value);
 
     return {};
 };

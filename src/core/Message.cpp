@@ -25,9 +25,12 @@ std::expected<Message, std::error_code> Message::fromBytes(std::span<std::byte> 
     port = ntohs(port);
     offset += sizeof(port);
 
-    uint32_t peerId;
-    std::memcpy(&peerId, bytes.data() + offset, sizeof(peerId));
-    peerId = ntohl(peerId);
+    std::uint32_t rawPeerId;
+    std::memcpy(&rawPeerId, bytes.data() + offset, sizeof(rawPeerId));
+
+    PeerID peerId{
+        .value = ntohl(rawPeerId)
+    };
 
     return Message{version, type, port, peerId};
 };
@@ -47,8 +50,8 @@ std::array<std::byte, MESSAGE_SIZE> Message::toBytes(const Message &msg)
     std::memcpy(payload.data() + offset, &port, sizeof(port));
     offset += sizeof(msg.port);
 
-    uint32_t peerId = htonl(msg.peerId);
-    std::memcpy(payload.data() + offset, &peerId, sizeof(peerId));
+    const std::uint32_t rawPeerId = htonl(msg.peerId.value);
+    std::memcpy(payload.data() + offset, &rawPeerId, sizeof(rawPeerId));
 
     return payload;
 }

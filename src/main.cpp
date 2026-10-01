@@ -1,3 +1,5 @@
+#include "cli/CLI.hpp"
+#include "client/TetherClient.hpp"
 #include "core/PeerDiscovery.hpp"
 #include <cstdint>
 #include <print>
@@ -7,29 +9,10 @@
 
 using namespace std::chrono_literals;
 
-// TODO:
-// - cli
-
 constexpr uint16_t BROADCAST_PORT = 6767;
 
 int main(int argc, char *argv[])
 {
-    // temporary
-    std::string tcpPortValue;
-    if(argc > 1)
-    {
-        std::string_view tcpPortArg = argv[1];
-
-        if(tcpPortArg == "--port" && argv[2])
-        {
-            tcpPortValue = argv[2];
-        }
-        else
-            return 1;
-    }
-
-    uint16_t tcpPort = static_cast<uint16_t>(std::stoi(tcpPortValue));
-
     auto discovery = PeerDiscovery::create(BROADCAST_PORT);
     if(!discovery)
     {
@@ -37,24 +20,11 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    bool isRunning = true;
-    while(isRunning)
-    {
-        // TODO: handle transient network errors (e.g. interface reconnect) with retry instead of
-        // terminating
+    TetherClient client{std::move(*discovery)};
 
-        if(auto res = discovery->announceSelf(tcpPort); !res)
-        {
-            std::println("Error while announcing self: {}", res.error().message());
-            return 1;
-        }
+    CLI cli{client};
+    auto result = cli.parse(argc, argv);
+    if (result) cli.process(*result);
 
-        if(auto res = discovery->discover(); !res)
-        {
-            std::println("Error while discovering: {}", res.error().message());
-            return 1;
-        }
-    }
-
-    std::unreachable();
+    return 0;
 }

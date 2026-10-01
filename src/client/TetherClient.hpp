@@ -1,16 +1,20 @@
 #pragma once
 
 #include "core/Peer.hpp"
-#include <cstdint>
+#include "core/PeerDiscovery.hpp"
+#include <expected>
+#include <system_error>
 #include <vector>
 
-// TODO:
-// - implement methods
 class TetherClient
 {
     public:
-        std::vector<Peer> discover(uint16_t port);
+        TetherClient(PeerDiscovery pd) : pd(std::move(pd)) {};
+
+        std::expected<void, std::error_code> run();
         std::vector<Peer> peers();
-        void connect(const Peer &peer);
-        // Status status();
+        std::expected<void, std::error_code> connect(const Peer &peer);
+
+    private:
+        PeerDiscovery pd;
 };

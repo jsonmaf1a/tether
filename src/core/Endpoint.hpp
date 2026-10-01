@@ -3,7 +3,9 @@
 #include <arpa/inet.h>
 #include <cstdint>
 #include <netinet/in.h>
+#include <optional>
 #include <string>
+#include <string_view>
 
 class Endpoint
 {
@@ -19,4 +21,6 @@ class Endpoint
             inet_ntop(AF_INET, &ip, s, INET_ADDRSTRLEN);
             return s;
         };
+
+        static std::optional<Endpoint> parse(std::string_view value);
 };

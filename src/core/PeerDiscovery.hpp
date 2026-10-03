@@ -18,29 +18,31 @@ using namespace std::chrono_literals;
 constexpr auto DISCOVERY_TIMEOUT = 2500ms;
 constexpr auto PEER_TIMEOUT = 10s;
 
+constexpr uint16_t BROADCAST_PORT = 6767;
+
 class PeerDiscovery
 {
     public:
-        static std::expected<PeerDiscovery, std::error_code> create(uint16_t port)
+        static std::expected<PeerDiscovery, std::error_code> create()
         {
             return UDPSocket::create().and_then(
-                [port](UDPSocket socket) -> std::expected<PeerDiscovery, std::error_code> {
-                    if(auto r = socket.enableReuse(); !r)
+                [](UDPSocket socket) -> std::expected<PeerDiscovery, std::error_code> {
+                    if(auto result = socket.enableReuse(); !result)
                     {
-                        return std::unexpected(r.error());
+                        return std::unexpected(result.error());
                     }
-                    if(auto r = socket.enableBroadcast(); !r)
+                    if(auto result = socket.enableBroadcast(); !result)
                     {
-                        return std::unexpected(r.error());
+                        return std::unexpected(result.error());
                     }
-                    if(auto r = socket.bind(port); !r)
+                    if(auto result = socket.bind(BROADCAST_PORT); !result)
                     {
-                        return std::unexpected(r.error());
+                        return std::unexpected(result.error());
                     }
 
                     sockaddr_in broadcast{};
                     broadcast.sin_family = AF_INET;
-                    broadcast.sin_port = htons(port);
+                    broadcast.sin_port = htons(BROADCAST_PORT);
                     broadcast.sin_addr.s_addr = htonl(INADDR_BROADCAST);
 
                     return PeerDiscovery(std::move(socket), broadcast);

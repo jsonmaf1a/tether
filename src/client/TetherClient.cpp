@@ -1,15 +1,17 @@
 #include "TetherClient.hpp"
+#include <cstdint>
 #include <expected>
 
-// TODO: pass tcp port from cli
-std::expected<void, std::error_code> TetherClient::run()
+std::expected<void, std::error_code> TetherClient::run(uint16_t tcpPort)
 {
     while(true)
     {
-        // TODO: handle transient network errors (e.g. interface reconnect) with retry instead of
+        // TODO:
+        // - handle transient network errors (e.g. interface reconnect) with retry instead of
         // terminating
+        // - start TCP listening on tcpPort
 
-        if(auto res = pd.announceSelf(1818); !res)
+        if(auto res = pd.announceSelf(tcpPort); !res)
         {
             std::println("Error while announcing self: {}", res.error().message());
             break;

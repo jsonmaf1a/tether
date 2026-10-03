@@ -22,10 +22,19 @@ class Args
 
         std::span<char *> arguments() const
         {
+            if(count <= 2)
+                return {};
+
             return {values + 2, static_cast<std::size_t>(count - 2)};
         };
 
-        char *at(size_t index) const { return arguments()[index]; };
+        std::optional<char *> at(size_t index) const
+        {
+            if(index >= arguments().size())
+                return std::nullopt;
+
+            return arguments()[index];
+        };
 
     private:
         int count;

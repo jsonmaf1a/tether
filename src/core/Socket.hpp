@@ -54,7 +54,9 @@ class Socket
     protected:
         explicit Socket(int socketFd) : fd(socketFd)
         {
+#ifdef TETHER_DEBUG
             std::println("Socket {} initialized successfully", fd);
+#endif
         }
 
         int fd = -1;
